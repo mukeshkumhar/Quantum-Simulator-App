@@ -50,3 +50,16 @@ data class DensityMatrix(
     @SerializedName("imag")
     val imag: List<List<Double>>
 )
+
+data class CodeRequest (
+    val code: String
+)
+
+data class CodeResponse (
+    val output: String?,
+    val measurement_counts: Map<String, Int>?,
+    val statevector: List<Double>?,
+    val unitary_matrix_real: List<List<Double>>?,
+    val unitary_matrix_imag: List<List<Double>>?,
+    val circuit_image: String?
+)
