@@ -1,8 +1,13 @@
 package com.example.quantumsimulator.Activity
 
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Base64
 import android.view.View
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -12,16 +17,28 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.quantumsimulator.Adapter.GateAdapter
+import com.example.quantumsimulator.Adapter.UnitaryMatrixAdapter
 import com.example.quantumsimulator.ApiManager.RetrofitClient
 import com.example.quantumsimulator.DataModels.GateAction
 import com.example.quantumsimulator.DataModels.QuantumGates
 import com.example.quantumsimulator.DataModels.QuantumRequest
 import com.example.quantumsimulator.DataModels.QuantumResponse
+import com.example.quantumsimulator.DataModels.StateVectorEntry
 import com.example.quantumsimulator.DataModels.quantumGates
 import com.example.quantumsimulator.R
 import com.example.quantumsimulator.databinding.ActivityQuantumCircuitBinding
+import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.utils.ColorTemplate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -38,6 +55,27 @@ class QuantumCircuitActivity : AppCompatActivity() {
     private val undoButton by lazy { binding.undoButton }
     private lateinit var qubitRows: Array<LinearLayout>
     private val appliedGates = mutableListOf<GateAction>()
+
+    private var progressDialog: AlertDialog? = null
+    private var handler: Handler? = null
+    private var runnable: Runnable? = null
+
+    private val messages = listOf("Loading...","Quantum is simulating...", "Please wait...")
+    private var currentMessageIndex = 0
+    private var currentCharIndex = 0
+    private var isDeleting = false
+
+    private var resultTypingHandler: Handler? = null
+    private var resultTypingRunnable: Runnable? = null
+
+    private lateinit var MeasurementbarChart: BarChart
+    private lateinit var statevectorChart: BarChart
+
+    private var unitaryReal: List<List<Double>> = listOf()
+    private var unitaryImag: List<List<Double>> = listOf()
+
+
+
 
     private val qubitCount = 3 // Change this to support more qubits
 
@@ -62,6 +100,9 @@ class QuantumCircuitActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        MeasurementbarChart = binding.measurementBarChart
+        statevectorChart = binding.statevectorBarChart
+
 
 
 
@@ -84,6 +125,7 @@ class QuantumCircuitActivity : AppCompatActivity() {
 
 //        Call API When run button is clicked
         binding.btnRunCircuit.setOnClickListener {
+            showLoadingDialog()
             callQuantumApi()
         }
 
@@ -155,11 +197,30 @@ class QuantumCircuitActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful  && response.body() != null){
                         val result = response.body()
+                        hideLoadingDialog()
                         println("Result From API: $result")
-                        binding.tvResult.text = result.toString()
+                        animateResultTyping(result?.circuit_diagram.toString())
+
+                        val circuitBase64 = result?.circuit_diagram_image ?: ""
+                        val imageView = binding.circuitImage
+
+                        showCircuitDiagram(circuitBase64, imageView)
+
+                        showProbabilityBarChart(result?.probability_distribution)
+                        showBarChart(result?.measurement_counts ?: emptyMap())
+                        showStatevectorChart(result?.statevector ?: emptyList())
+//                        binding.tvResult.text = result.toString()
+                        unitaryReal = result?.unitary_matrix?.real!!
+                        unitaryImag = result?.unitary_matrix?.imag!!
+
+                        // Setup RecyclerView here
+                        setupRecyclerView()
+
+
                     }
                 }
             } catch (e: Exception) {
+                hideLoadingDialog()
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@QuantumCircuitActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
@@ -206,5 +267,232 @@ class QuantumCircuitActivity : AppCompatActivity() {
             Toast.makeText(this, "${gate.name} restored to Qubit ${qubitIndex + 1}", Toast.LENGTH_SHORT).show()
         }
     }
+
+    fun showCircuitDiagram(base64Image: String, imageView: ImageView) {
+        try {
+            val decodedBytes = Base64.decode(base64Image, Base64.DEFAULT)
+            val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+            imageView.setImageBitmap(bitmap)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+//    probabilities chart
+
+    private fun showProbabilityBarChart(probabilities: Map<String, Float>?) {
+        val entries = ArrayList<BarEntry>()
+        val labels = ArrayList<String>()
+
+        var index = 0f
+        if (probabilities != null) {
+            for ((state, prob) in probabilities) {
+                entries.add(BarEntry(index, prob * 100)) // Convert to percentage
+                labels.add("|$state⟩")
+                index++
+            }
+        }
+
+        val dataSet = BarDataSet(entries, "Probability %")
+        dataSet.setColors(ColorTemplate.MATERIAL_COLORS, 255)
+        dataSet.valueTextColor = Color.WHITE
+        dataSet.valueTextSize = 14f
+
+        // ✨ Custom formatter to show percentage sign
+        dataSet.valueFormatter = object : ValueFormatter() {
+            override fun getFormattedValue(value: Float): String {
+                return String.format("%.2f%%", value)
+            }
+        }
+
+        val barData = BarData(dataSet)
+
+        val chart = binding.probabilityChart
+        chart.data = barData
+        chart.description.isEnabled = false
+        chart.setFitBars(true)
+        chart.animateY(1000)
+
+        val xAxis = chart.xAxis
+        xAxis.valueFormatter = IndexAxisValueFormatter(labels)
+        xAxis.granularity = 1f
+        xAxis.position = XAxis.XAxisPosition.BOTTOM
+        xAxis.textSize = 12f
+        xAxis.textColor = Color.WHITE
+
+        chart.axisLeft.axisMinimum = 0f
+        chart.axisRight.isEnabled = false
+
+        chart.invalidate() // Refresh the chart
+    }
+
+
+//    Statevector BarChart
+
+    private fun showStatevectorChart(stateVectorItems: List<StateVectorEntry>) {
+        val entries = ArrayList<BarEntry>()
+        val labels = ArrayList<String>()
+
+        for ((index, item) in stateVectorItems.withIndex()) {
+
+            val probability = (item.amplitude * item.amplitude).toFloat()  // Compute |α|²
+            entries.add(BarEntry(index.toFloat(), probability))
+            labels.add("${item.basis}\n")  // Label with state + probability
+        }
+
+        val dataSet = BarDataSet(entries, "Quantum State Probabilities")
+        dataSet.setColors(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.CYAN)  // Unique colors
+        dataSet.valueTextColor = Color.WHITE
+        dataSet.valueTextSize = 12f
+
+        val barData = BarData(dataSet)
+        statevectorChart.data = barData
+
+        // Customize X-Axis
+        val xAxis = statevectorChart.xAxis
+        xAxis.valueFormatter = IndexAxisValueFormatter(labels)
+        xAxis.position = XAxis.XAxisPosition.BOTTOM
+        xAxis.textColor = Color.WHITE
+        xAxis.textSize = 12f
+        xAxis.granularity = 1f
+        xAxis.setDrawGridLines(false)
+
+        // Customize Y-Axis
+        statevectorChart.axisLeft.textColor = Color.WHITE
+        statevectorChart.axisRight.isEnabled = false
+
+        // Enable touch interactions
+        statevectorChart.setTouchEnabled(true)
+        statevectorChart.setPinchZoom(true)
+
+        // Customize Chart
+        statevectorChart.setFitBars(true)
+        statevectorChart.description.isEnabled = false
+        statevectorChart.legend.textColor = Color.WHITE
+        statevectorChart.animateY(1000)
+    }
+
+
+    //    Measurement BarChart
+private fun showBarChart(measurementCounts: Map<String, Int>) {
+    val entries = ArrayList<BarEntry>()
+    val labels = ArrayList<String>()
+
+    var index = 0
+    for ((state, count) in measurementCounts) {
+        entries.add(BarEntry(index.toFloat(), count.toFloat()))
+        labels.add("|$state⟩")
+        index++
+    }
+
+    val dataSet = BarDataSet(entries, "Measurement Counts")
+    dataSet.color = Color.CYAN
+    dataSet.valueTextColor = Color.WHITE
+    dataSet.valueTextSize = 14f
+
+    val barData = BarData(dataSet)
+    MeasurementbarChart.data = barData
+
+    // Customize X-Axis
+    val xAxis = MeasurementbarChart.xAxis
+    xAxis.valueFormatter = IndexAxisValueFormatter(labels)
+    xAxis.position = XAxis.XAxisPosition.BOTTOM
+    xAxis.textColor = Color.WHITE
+    xAxis.textSize = 12f
+    xAxis.granularity = 1f
+    xAxis.setDrawGridLines(false)
+
+    // Customize Y-Axis
+    MeasurementbarChart.axisLeft.textColor = Color.WHITE
+    MeasurementbarChart.axisRight.isEnabled = false // Hide right Y-Axis
+
+    // Customize Bar Chart
+    MeasurementbarChart.setFitBars(true)
+    MeasurementbarChart.description.isEnabled = false
+    MeasurementbarChart.legend.textColor = Color.WHITE
+    MeasurementbarChart.animateY(1000)
+}
+
+
+    private fun setupRecyclerView() {
+        if (unitaryReal.isNotEmpty()) {
+            val recyclerView: RecyclerView = findViewById(R.id.unitaryMatrixRecycler)
+            recyclerView.layoutManager = GridLayoutManager(this, unitaryReal[0].size)
+            recyclerView.adapter = UnitaryMatrixAdapter(unitaryReal)
+        } else {
+            Toast.makeText(this, "Matrix data is empty", Toast.LENGTH_SHORT).show()
+            print("Matrix data is empty")
+        }
+    }
+
+
+    private fun showLoadingDialog() {
+        val builder = AlertDialog.Builder(this)
+        val dialogView = layoutInflater.inflate(R.layout.custom_progress_dialog, null)
+        val typingText = dialogView.findViewById<TextView>(R.id.typingText)
+        builder.setView(dialogView)
+        builder.setCancelable(false)
+        progressDialog = builder.create()
+        progressDialog?.show()
+
+        handler = Handler(Looper.getMainLooper())
+        runnable = object : Runnable {
+            override fun run() {
+                val fullText = messages[currentMessageIndex]
+
+                if (!isDeleting) {
+                    if (currentCharIndex <= fullText.length) {
+                        typingText.text = fullText.substring(0, currentCharIndex)
+                        currentCharIndex++
+                        handler?.postDelayed(this, 100)
+                    } else {
+                        isDeleting = true
+                        handler?.postDelayed(this, 1000)
+                    }
+                } else {
+                    if (currentCharIndex > 0) {
+                        if (currentCharIndex <= fullText.length){
+                            typingText.text = fullText.substring(0, currentCharIndex)
+                            currentCharIndex--
+                            handler?.postDelayed(this, 10)
+                        } else{
+                            currentCharIndex--
+                            handler?.postDelayed(this, 10)
+                        }
+                    } else {
+                        isDeleting = false
+                        currentMessageIndex = (currentMessageIndex + 1) % messages.size
+                        handler?.postDelayed(this, 500)
+                    }
+                }
+            }
+        }
+
+        handler?.post(runnable!!)
+    }
+
+    private fun hideLoadingDialog() {
+        handler?.removeCallbacks(runnable!!)
+        progressDialog?.dismiss()
+    }
+
+    private fun animateResultTyping(text: String) {
+        resultTypingHandler = Handler(Looper.getMainLooper())
+        var index = 0
+
+        resultTypingRunnable = object : Runnable {
+            override fun run() {
+                if (index <= text.length) {
+                    binding.tvResult.text = text.substring(0, index)
+                    index++
+                    resultTypingHandler?.postDelayed(this, 1)
+                }
+            }
+        }
+
+        resultTypingHandler?.post(resultTypingRunnable!!)
+    }
+
+
 
 }
