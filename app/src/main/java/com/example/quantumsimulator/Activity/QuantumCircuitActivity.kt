@@ -1,5 +1,6 @@
 package com.example.quantumsimulator.Activity
 
+import android.R.attr.orientation
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
@@ -54,6 +55,7 @@ class QuantumCircuitActivity : AppCompatActivity() {
     private val undoStack = Stack<Triple<TextView, QuantumGates, Int>>()
     private val undoButton by lazy { binding.undoButton }
     private lateinit var qubitRows: Array<LinearLayout>
+    private val noOfQubit = mutableListOf<LinearLayout>()
     private val appliedGates = mutableListOf<GateAction>()
 
     private var progressDialog: AlertDialog? = null
@@ -74,7 +76,8 @@ class QuantumCircuitActivity : AppCompatActivity() {
     private var unitaryReal: List<List<Double>> = listOf()
     private var unitaryImag: List<List<Double>> = listOf()
 
-
+    private var densityReal: List<List<Double>> = listOf()
+    private var densityImag: List<List<Double>> = listOf()
 
 
     private val qubitCount = 3 // Change this to support more qubits
@@ -99,6 +102,9 @@ class QuantumCircuitActivity : AppCompatActivity() {
             val intent = android.content.Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
+
+        val qubitContainer = binding.gateName
+        qubitName(qubitContainer,qubitCount)
 
         MeasurementbarChart = binding.measurementBarChart
         statevectorChart = binding.statevectorBarChart
@@ -129,6 +135,32 @@ class QuantumCircuitActivity : AppCompatActivity() {
             callQuantumApi()
         }
 
+        val unitaryRecycler = binding.unitaryMatrixRecycler
+        val densityRecycler = binding.densityMatrixRecycler
+
+        binding.unitaryBtn.setOnClickListener {
+            if (unitaryRecycler.visibility == View.VISIBLE){
+                unitaryRecycler.visibility = View.GONE
+                binding.unitaryBtn.text = "Show Unitary Matrix"
+            } else {
+
+                unitaryRecycler.visibility = View.VISIBLE
+                binding.unitaryBtn.text = "Hide Unitary Matrix"
+            }
+        }
+
+        binding.densityBtn.setOnClickListener {
+            if (densityRecycler.visibility == View.VISIBLE){
+                densityRecycler.visibility = View.GONE
+                binding.densityBtn.text = "Show Density Matrix"
+            } else {
+                densityRecycler.visibility = View.VISIBLE
+                binding.densityBtn.text = "Hide Density Matrix"
+            }
+        }
+
+
+
 
     }
 
@@ -145,6 +177,33 @@ class QuantumCircuitActivity : AppCompatActivity() {
             .show()
     }
 
+    private fun qubitName(container: LinearLayout, numberOfQubits: Int){
+
+        noOfQubit.clear() // Clear existing rows if any
+
+        for (i in 0 until numberOfQubits) {
+            val rowLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    setMargins(15, 30, 0, 0) // Margin bottom 10
+                }
+            }
+
+            val label = TextView(this).apply {
+                text = "Q${i + 1}->"
+                textSize = 16f
+                setPadding(10, 10, 20, 10)
+            }
+
+            rowLayout.addView(label)
+            container.addView(rowLayout)
+            noOfQubit.add(rowLayout) // Save for later gate additions
+        }
+    }
+
 //    Add gates to the circuit
     private fun addGateToCircuit(gate: QuantumGates,qubitIndex: Int) {
     // Create a new TextView to represent the gate
@@ -153,6 +212,14 @@ class QuantumCircuitActivity : AppCompatActivity() {
     gateView.textSize = 18f
     gateView.setPadding(10, 10, 10, 10)
     gateView.setBackgroundResource(R.drawable.gate_bg)
+
+    // Set layout params with bottom margin
+    val layoutParams = LinearLayout.LayoutParams(
+        LinearLayout.LayoutParams.WRAP_CONTENT,
+        LinearLayout.LayoutParams.WRAP_CONTENT
+    )
+    layoutParams.setMargins(15, 0, 0, 15) // Left, Top, Right, Bottom (in px)
+    gateView.layoutParams = layoutParams
 
     // Long press to delete the gate
     gateView.setOnLongClickListener {
@@ -206,15 +273,20 @@ class QuantumCircuitActivity : AppCompatActivity() {
 
                         showCircuitDiagram(circuitBase64, imageView)
 
-                        showProbabilityBarChart(result?.probability_distribution)
+                        showProbabilityBarChart(result?.probability_distribution as Map<String, Float>?)
                         showBarChart(result?.measurement_counts ?: emptyMap())
                         showStatevectorChart(result?.statevector ?: emptyList())
 //                        binding.tvResult.text = result.toString()
                         unitaryReal = result?.unitary_matrix?.real!!
                         unitaryImag = result?.unitary_matrix?.imag!!
 
+                        densityReal = result?.density_matrix?.real!!
+                        densityImag = result?.density_matrix?.imag!!
+
                         // Setup RecyclerView here
                         setupRecyclerView()
+                        densityRecyclerView()
+
 
 
                     }
@@ -321,7 +393,14 @@ class QuantumCircuitActivity : AppCompatActivity() {
         xAxis.textColor = Color.WHITE
 
         chart.axisLeft.axisMinimum = 0f
+        chart.axisLeft.textColor = Color.WHITE
         chart.axisRight.isEnabled = false
+
+        // Customize Chart
+        chart.setFitBars(true)
+        chart.description.isEnabled = false
+        chart.legend.textColor = Color.WHITE
+        chart.animateY(1000)
 
         chart.invalidate() // Refresh the chart
     }
@@ -413,7 +492,7 @@ private fun showBarChart(measurementCounts: Map<String, Int>) {
     MeasurementbarChart.animateY(1000)
 }
 
-
+//    Unitary Matrix
     private fun setupRecyclerView() {
         if (unitaryReal.isNotEmpty()) {
             val recyclerView: RecyclerView = findViewById(R.id.unitaryMatrixRecycler)
@@ -424,6 +503,19 @@ private fun showBarChart(measurementCounts: Map<String, Int>) {
             print("Matrix data is empty")
         }
     }
+
+//    Density Matrix
+private fun densityRecyclerView() {
+    if (densityReal.isNotEmpty()) {
+        val recyclerView: RecyclerView = findViewById(R.id.densityMatrixRecycler)
+        recyclerView.layoutManager = GridLayoutManager(this, densityReal[0].size)
+        recyclerView.adapter = UnitaryMatrixAdapter(densityReal)
+    } else {
+        Toast.makeText(this, "Matrix data is empty", Toast.LENGTH_SHORT).show()
+        print("Matrix data is empty")
+    }
+}
+
 
 
     private fun showLoadingDialog() {

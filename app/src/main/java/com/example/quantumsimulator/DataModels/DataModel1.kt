@@ -25,7 +25,7 @@ data class QuantumResponse(
     val statevector_imag: List<Double>,
     val unitary_matrix: UnitaryMatrix,
     val density_matrix: DensityMatrix,
-    val probability_distribution: Map<String, Float>,
+    val probability_distribution: Map<String, Double>,
     val circuit_diagram: String,
     val circuit_diagram_image: String
 )

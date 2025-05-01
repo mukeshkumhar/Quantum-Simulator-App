@@ -1,6 +1,8 @@
 package com.example.quantumsimulator.Activity
 
+import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Base64
 import androidx.activity.enableEdgeToEdge
@@ -13,14 +15,20 @@ import com.example.quantumsimulator.DataModels.CodeRequest
 import com.example.quantumsimulator.DataModels.CodeResponse
 import com.example.quantumsimulator.R
 import com.example.quantumsimulator.databinding.ActivityQuantumEditorBinding
+import io.github.rosemoe.sora.langs.textmate.TextMateColorScheme
+import io.github.rosemoe.sora.langs.textmate.TextMateLanguage
+import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Response
+import kotlin.time.TimeSource
+
 
 class QuantumEditorActivity : AppCompatActivity() {
     private lateinit var binding: ActivityQuantumEditorBinding
 
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityQuantumEditorBinding.inflate(layoutInflater)
@@ -41,6 +49,33 @@ class QuantumEditorActivity : AppCompatActivity() {
             RunCode()
         }
 
+//        val webView = binding.codeEditorWebView
+
+        val editor = binding.editor
+        editor.requestFocus()
+        editor.showSoftInput()  // This opens the keyboard
+//        val tmLanguage = TextMateLanguage.create("source.python", true)
+//        editor.setEditorLanguage(tmLanguage)
+//        editor.setText("""print("Hello World1!")""".trimIndent())
+        // Optional: Enable auto-indent, line numbers, etc.
+        editor.isLineNumberEnabled = true
+        editor.isWordwrap = false
+        editor.isHighlightCurrentLine = true
+         val schemee = editor.colorScheme // Or createDracula(), etc.
+        schemee.setColor(EditorColorScheme.KEYWORD, Color.BLUE)
+
+
+//        webView.settings.javaScriptEnabled = true
+//        webView.settings.allowFileAccess = true
+//        webView.settings.domStorageEnabled = true
+//        webView.settings.allowUniversalAccessFromFileURLs = true
+//        webView.settings.allowFileAccessFromFileURLs = true
+//
+//
+//        webView.webChromeClient = WebChromeClient()
+//        webView.webViewClient = WebViewClient()
+//
+//        webView.loadUrl("file:///android_asset/editor/index.html")
 
     }
 

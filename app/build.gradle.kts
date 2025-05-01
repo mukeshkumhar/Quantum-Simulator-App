@@ -29,11 +29,12 @@ android {
         viewBinding = true
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 
 }
@@ -61,6 +62,22 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+//    implementation("com.github.Thereisnospon:CodeView-android:1.2.1")
+
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+
+    implementation(platform("io.github.Rosemoe.sora-editor:bom:0.23.5"))
+    implementation("io.github.Rosemoe.sora-editor:editor")
+    implementation("io.github.Rosemoe.sora-editor:language-textmate")
+//    implementation ("io.github.rosemoe.sora-editor:language-python:0.23.0")
+
+
+
+
+//    codeview
+//    implementation ("io.github.kbiakov:CodeView-Android:1.3.2")
+
 
 
 

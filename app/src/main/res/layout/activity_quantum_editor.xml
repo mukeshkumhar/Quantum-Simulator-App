@@ -14,6 +14,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/back_button_bg"
         android:padding="8sp"
+        android:contentDescription="Back Button"
         android:layout_margin="10sp"
         android:src="@drawable/back_svgrepo_com"
         app:layout_constraintStart_toStartOf="parent"
@@ -46,7 +47,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
             <androidx.appcompat.widget.AppCompatEditText
@@ -56,10 +57,24 @@
                 android:padding="10sp"
                 android:background="@drawable/code_editor_bg"
                 android:hint="Wright your Quantum Code Here"
-                android:text="Hello"
                 android:textSize="14sp"
                 android:textColor="@color/md_theme_surface"
-                android:textColorHint="@color/md_theme_primary" />
+                android:textColorHint="@color/md_theme_surface"/>
+
+<!--            <WebView-->
+<!--                android:id="@+id/codeEditorWebView"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="100dp" />-->
+
+            <io.github.rosemoe.sora.widget.CodeEditor
+                android:id="@+id/editor"
+                android:layout_width="match_parent"
+                android:layout_height="400sp"
+                app:text="print('Hello, world!')"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                app:textSize="16sp"/>
+
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/runCodeBtn"
