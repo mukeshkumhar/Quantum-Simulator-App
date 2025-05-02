@@ -70,8 +70,9 @@ dependencies {
     implementation(platform("io.github.Rosemoe.sora-editor:bom:0.23.5"))
     implementation("io.github.Rosemoe.sora-editor:editor")
     implementation("io.github.Rosemoe.sora-editor:language-textmate")
-//    implementation ("io.github.rosemoe.sora-editor:language-python:0.23.0")
-
+//    implementation ("io.github.Rosemoe.sora-editor:language-python:0.23.0")
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+//    kapt ("com.github.bumptech.glide:compiler:4.16.0")
 
 
 

@@ -6,11 +6,16 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.quantumsimulator.Adapter.ChapterAdapter
+import com.example.quantumsimulator.DataModels.chapterList
 import com.example.quantumsimulator.R
 import com.example.quantumsimulator.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    lateinit var chapterAdapter: ChapterAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -33,5 +38,10 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, QuantumCircuitActivity::class.java)
             startActivity(intent)
         }
+
+        val recyclerView = binding.recyclerView
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        chapterAdapter = ChapterAdapter(chapterList)
+        recyclerView.adapter = chapterAdapter
     }
 }

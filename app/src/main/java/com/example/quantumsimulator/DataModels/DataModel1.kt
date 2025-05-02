@@ -2,11 +2,12 @@ package com.example.quantumsimulator.DataModels
 
 import com.google.gson.annotations.SerializedName
 
-data class QuantumConcept(
-    val title: String,
-    val description: String,
-    val iconResId: Int
-)
+//data class QuantumChapter(
+//    val title: String,
+//    val description: String,
+//    val imageUrl: String,
+//    var isExpanded: Boolean = false
+//)
 
 data class QuantumRequest(
     val num_qubits: Int,
