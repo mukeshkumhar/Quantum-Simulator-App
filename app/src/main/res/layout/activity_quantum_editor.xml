@@ -45,6 +45,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ProgressBar
+        android:id="@+id/editProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -73,16 +83,11 @@
                 android:textColor="@color/md_theme_surface"
                 android:textColorHint="@color/md_theme_surface"/>
 
-<!--            <WebView-->
-<!--                android:id="@+id/codeEditorWebView"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="100dp" />-->
-
             <io.github.rosemoe.sora.widget.CodeEditor
                 android:id="@+id/editor"
                 android:layout_width="match_parent"
                 android:layout_height="400sp"
-                app:text="print('Hello, world!')"
+                app:text="qc = QuantumCircuit(2)\nqc.h(0)\nqc.cx(0, 1)\nprint('Bell State Created!')"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 app:textSize="16sp"/>
@@ -96,6 +101,8 @@
                 android:visibility="gone"
                 android:text="Run Code"
                 android:textStyle="bold" />
+
+
             <TextView
                 android:id="@+id/outputText"
                 android:layout_width="match_parent"
@@ -105,20 +112,146 @@
                 android:textSize="12sp"
                 android:padding="10sp"
                 android:text="Output..."/>
+
+
             <TextView
                 android:id="@+id/outputText1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/md_theme_primary"
                 android:textSize="12sp"
-                android:padding="10sp"
+                android:layout_marginTop="5sp"
+                android:padding="5sp"
                 android:text="Output1..."/>
-            <ImageView
+
+            <TextView
+                android:id="@+id/errorText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/md_theme_error"
+                android:textSize="12sp"
+                android:padding="5sp"
+                android:text=""/>
+
+
+
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/circuitImage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:scaleType="fitCenter"
-                />
+                android:layout_marginBottom="10sp"/>
+
+<!--            <TextView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="5sp"-->
+<!--                android:textColor="@color/md_theme_onPrimary"-->
+<!--                android:text="Probability Distribution"/>-->
+
+<!--            <com.github.mikephil.charting.charts.BarChart-->
+<!--                android:id="@+id/probabilityChart"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"/>-->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5sp"
+                android:textColor="@color/md_theme_onPrimary"
+                android:text="Measurement Results"/>
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/measurementBarChart"
+                android:layout_width="match_parent"
+                android:layout_height="250sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20sp"
+                android:textColor="@color/md_theme_onPrimary"
+                android:text="Statevectore"/>
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/statevectorBarChart"
+                android:layout_width="match_parent"
+                android:layout_height="200sp" />
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10sp"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/md_theme_onPrimary"
+                    android:text="Unitary Matrix"/>
+                <View
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/unitaryBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="15sp"
+                    android:background="@drawable/button_bg"
+                    android:textColor="@color/md_theme_onPrimary"
+                    android:text="Show Unitary Matrix"
+                    style="@style/MaterialAlertDialog.Material3.Body.Text"
+                    android:textStyle="bold"/>
+
+            </LinearLayout>
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/unitaryMatrixRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:nestedScrollingEnabled="false" />
+
+
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:orientation="horizontal">-->
+<!--                <TextView-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:textColor="@color/md_theme_onPrimary"-->
+<!--                    android:text="Density Matrix"/>-->
+<!--                <View-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_weight="1"/>-->
+<!--                <androidx.appcompat.widget.AppCompatButton-->
+<!--                    android:id="@+id/densityBtn"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:padding="15sp"-->
+<!--                    android:background="@drawable/button_bg"-->
+<!--                    android:textColor="@color/md_theme_onPrimary"-->
+<!--                    android:text="Show Density Matrix"-->
+<!--                    style="@style/MaterialAlertDialog.Material3.Body.Text"-->
+<!--                    android:textStyle="bold"/>-->
+
+<!--            </LinearLayout>-->
+<!--            <androidx.recyclerview.widget.RecyclerView-->
+<!--                android:id="@+id/densityMatrixRecycler"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:visibility="gone"-->
+<!--                android:nestedScrollingEnabled="false" />-->
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="40sp"
+                android:layout_marginBottom="10sp"/>
         </LinearLayout>
     </ScrollView>
 

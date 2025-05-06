@@ -62,5 +62,6 @@ data class CodeResponse (
     val statevector: List<Double>?,
     val unitary_matrix_real: List<List<Double>>?,
     val unitary_matrix_imag: List<List<Double>>?,
-    val circuit_image: String?
+    val circuit_image: String?,
+    val error: String?
 )

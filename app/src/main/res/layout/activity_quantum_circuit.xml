@@ -174,6 +174,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="10sp"
                 android:orientation="horizontal">
                 <TextView
                     android:layout_width="wrap_content"
@@ -188,11 +189,16 @@
                     android:id="@+id/unitaryBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/button_bg"
+                    android:textColor="@color/md_theme_onPrimary"
+                    android:padding="15sp"
                     android:text="Show Unitary Matrix"
                     style="@style/MaterialAlertDialog.Material3.Body.Text"
                     android:textStyle="bold"/>
 
             </LinearLayout>
+
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/unitaryMatrixRecycler"
                 android:layout_width="match_parent"
@@ -218,6 +224,9 @@
                     android:id="@+id/densityBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/button_bg"
+                    android:padding="15sp"
+                    android:textColor="@color/md_theme_onPrimary"
                     android:text="Show Density Matrix"
                     style="@style/MaterialAlertDialog.Material3.Body.Text"
                     android:textStyle="bold"/>

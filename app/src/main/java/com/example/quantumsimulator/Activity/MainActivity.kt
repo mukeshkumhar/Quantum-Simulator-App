@@ -1,6 +1,7 @@
 package com.example.quantumsimulator.Activity
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity

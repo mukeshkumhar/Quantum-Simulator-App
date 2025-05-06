@@ -276,6 +276,7 @@ class QuantumCircuitActivity : AppCompatActivity() {
                         showProbabilityBarChart(result?.probability_distribution as Map<String, Float>?)
                         showBarChart(result?.measurement_counts ?: emptyMap())
                         showStatevectorChart(result?.statevector ?: emptyList())
+
 //                        binding.tvResult.text = result.toString()
                         unitaryReal = result?.unitary_matrix?.real!!
                         unitaryImag = result?.unitary_matrix?.imag!!
