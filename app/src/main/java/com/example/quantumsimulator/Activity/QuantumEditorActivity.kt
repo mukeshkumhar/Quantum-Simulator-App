@@ -3,6 +3,7 @@ package com.example.quantumsimulator.Activity
 import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Base64
 import android.view.View
@@ -70,7 +71,9 @@ class QuantumEditorActivity : AppCompatActivity() {
         }
 
         binding.runBtn.setOnClickListener {
+            binding.editProgressBar.visibility = View.VISIBLE
             RunCode1()
+
         }
 
         MeasurementbarChart = binding.measurementBarChart
@@ -80,11 +83,12 @@ class QuantumEditorActivity : AppCompatActivity() {
         val editor = binding.editor
         editor.requestFocus()
         editor.showSoftInput()  // This opens the keyboard
+        editor.typefaceText = Typeface.MONOSPACE
 
 //        val tmLanguage = TextMateLanguage.create("source.python", true)
 //        editor.setEditorLanguage(tmLanguage)
 //        editor.setText("""print("Hello World1!")""".trimIndent())
-        // Optional: Enable auto-indent, line numbers, etc.
+//         Optional: Enable auto-indent, line numbers, etc.
 
         val schemee = editor.colorScheme // Or createDracula(), etc.
         schemee.setColor(EditorColorScheme.TEXT_NORMAL, Color.WHITE)
@@ -96,6 +100,20 @@ class QuantumEditorActivity : AppCompatActivity() {
         editor.isLineNumberEnabled = true
         editor.isWordwrap = true
         editor.isHighlightCurrentLine = true
+
+//        // Load the grammar (e.g., Python or JavaScript grammar)
+//        val grammar = assets.open("textmate/Python.tmLanguage.json").bufferedReader().use { it.readText() }
+//
+//        // Load the Molokai theme
+//        val theme = assets.open("textmate/monokai-color-theme.json").bufferedReader().use { it.readText() }
+
+//        // Create and apply the highlighter
+//        val highlighter = TextMateHighlighter()
+//        highlighter.setGrammar(grammar)
+//        highlighter.setTheme(theme)
+
+
+
 
         val unitaryRecycler = binding.unitaryMatrixRecycler
 
@@ -187,6 +205,8 @@ class QuantumEditorActivity : AppCompatActivity() {
                             binding.outputText1.text = result?.output
                             binding.errorText.text = "Error: " + result?.error
 
+                            binding.editProgressBar.visibility = View.GONE
+
                             val circuitBase64 = result?.circuit_image ?: ""
                             val imageView = binding.circuitImage
 
@@ -202,14 +222,17 @@ class QuantumEditorActivity : AppCompatActivity() {
 
                         } else {
                             binding.outputText1.text = "Something went wrong"
+                            binding.editProgressBar.visibility = View.GONE
                         }
                     }
 
                 } else {
                     binding.outputText1.text = "Please enter some code"
+                    binding.editProgressBar.visibility = View.GONE
                 }
             } catch (e: Exception) {
                 print("Error in RunCode: ${e.message}")
+                binding.editProgressBar.visibility = View.GONE
             }
         }
 
