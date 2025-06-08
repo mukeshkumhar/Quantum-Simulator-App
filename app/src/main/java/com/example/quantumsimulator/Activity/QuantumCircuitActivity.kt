@@ -266,7 +266,8 @@ class QuantumCircuitActivity : AppCompatActivity() {
                         val result = response.body()
                         hideLoadingDialog()
                         println("Result From API: $result")
-                        animateResultTyping(result?.circuit_diagram.toString())
+//                        animateResultTyping(result?.circuit_diagram.toString())
+                        animateResultTyping("Quantum Circuit Response Done")
 
                         val circuitBase64 = result?.circuit_diagram_image ?: ""
                         val imageView = binding.circuitImage

@@ -79,7 +79,7 @@
                 android:id="@+id/editor"
                 android:layout_width="match_parent"
                 android:layout_height="400sp"
-                app:text="qc = QuantumCircuit(2)\nqc.h(0)\nqc.cx(0, 1)\nprint('Bell State Created!')"
+                app:text="qc = QuantumCircuit(2)\nqc.h(0)\nqc.cx(0, 1)\nprint('My First Quantum Code!')"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 app:textSize="16sp"/>
