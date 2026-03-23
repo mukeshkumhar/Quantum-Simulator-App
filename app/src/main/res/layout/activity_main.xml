@@ -62,32 +62,43 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="10sp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:baselineAligned="false">
 
                         <androidx.appcompat.widget.AppCompatButton
                             android:id="@+id/codeEditButton"
                             style="@style/MaterialAlertDialog.Material3.Body.Text"
-                            android:layout_width="180sp"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_margin="@dimen/button_margin"
+                            android:minWidth="@dimen/button_min_width"
+                            android:maxWidth="@dimen/button_max_width"
                             android:background="@drawable/button_bg"
                             android:textColor="@color/md_theme_onPrimary"
+                            android:paddingVertical="@dimen/button_padding_vertical"
+                            android:paddingHorizontal="@dimen/button_padding_horizontal"
                             android:text="Quantum Code"
-                            android:textStyle="bold" />
-
-                        <View
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1" />
+                            android:textStyle="bold"
+                            android:textSize="@dimen/button_text_size" />
 
                         <androidx.appcompat.widget.AppCompatButton
                             android:id="@+id/circuitButton"
                             style="@style/MaterialAlertDialog.Material3.Body.Text"
-                            android:layout_width="180sp"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_margin="@dimen/button_margin"
+                            android:minWidth="@dimen/button_min_width"
+                            android:maxWidth="@dimen/button_max_width"
+                            android:paddingVertical="@dimen/button_padding_vertical"
+                            android:paddingHorizontal="@dimen/button_padding_horizontal"
                             android:background="@drawable/button_bg"
                             android:textColor="@color/md_theme_onPrimary"
                             android:text="Quantum Circuit"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            android:textSize="@dimen/button_text_size" />
                     </LinearLayout>
                 </LinearLayout>
 
